@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 
 //
 const Painting = require("./models/Painting");
+const { graphqlHapi, graphiqlHapi } = require("apollo-server-hapi");
+const schema = require("./graphql/schema");
 
 const server = hapi.server({
   port: 4000,
@@ -10,6 +12,32 @@ const server = hapi.server({
 });
 
 const init = async () => {
+  await server.register({
+    plugin: graphiqlHapi,
+    options: {
+      path: "/graphiql",
+      graphiqlOptions: {
+        endpointURL: "/graphql"
+      },
+      route: {
+        cors: true
+      }
+    }
+  });
+
+  await server.register({
+    plugin: graphqlHapi,
+    options: {
+      path: "/graphql",
+      graphqlOptions: {
+        schema
+      },
+      route: {
+        cors: true
+      }
+    }
+  });
+
   server.route([
     {
       method: "GET",
