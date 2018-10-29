@@ -5,6 +5,11 @@ const mongoose = require("mongoose");
 const Painting = require("./models/Painting");
 const { graphqlHapi, graphiqlHapi } = require("apollo-server-hapi");
 const schema = require("./graphql/schema");
+/* swagger section */
+const Inert = require("inert");
+const Vision = require("vision");
+const HapiSwagger = require("hapi-swagger");
+const Pack = require("./package");
 
 const server = hapi.server({
   port: 4000,
@@ -12,6 +17,20 @@ const server = hapi.server({
 });
 
 const init = async () => {
+  await server.register([
+    Inert,
+    Vision,
+    {
+      plugin: HapiSwagger,
+      options: {
+        info: {
+          title: "Paintings API Documentation",
+          version: Pack.version
+        }
+      }
+    }
+  ]);
+
   await server.register({
     plugin: graphiqlHapi,
     options: {
@@ -42,6 +61,10 @@ const init = async () => {
     {
       method: "GET",
       path: "/",
+      config: {
+        description: "Get all paintings",
+        tags: ["api", "v1", "paintings"]
+      },
       handler(request, reply) {
         `<h1>My modern api!</h1>`;
       }
@@ -49,6 +72,10 @@ const init = async () => {
     {
       method: "GET",
       path: "/api/v1/paintings",
+      config: {
+        description: "Get a specific painting by id",
+        tags: ["api", "v1", "paintings"]
+      },
       handler(req, reply) {
         return Painting.find();
       }
@@ -56,6 +83,10 @@ const init = async () => {
     {
       method: "POST",
       path: "/api/v1/paintings",
+      config: {
+        description: "Add a painting",
+        tags: ["api", "v1", "paintings"]
+      },
       handler: (req, reply) => {
         const { name, url, techniques } = req.payload;
         const painting = new Painting({
